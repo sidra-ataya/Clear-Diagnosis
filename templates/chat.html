@@ -5,13 +5,9 @@
 {% block content %}
 <section>
   <div class="container py-5">
-
     <div class="row">
-
       <div class="col-md-5 col-lg-4 col-xl-3 mb-4 mb-md-0 overflow-auto" style='height: 65vh;' id="chat-history">
-
         <h5 class="font-weight-bold mb-3 text-center text-lg-start">Chat History</h5>
-
         <div class="card shadow-sm">
           <div class="card-body">
           {% if new_chat %}
@@ -53,13 +49,11 @@
               </li>
               {% endfor %}
             </ul>
-
           {% else %}
             <p class="text-muted">No conversation history yet.</p>
           {% endif %}
           </div>
         </div>
-
       </div>
       <div class="col-md-1 col-lg-1 col-xl-1 overflow-auto"  style='height: 65vh;' id="chat-box"></div>
       <div class="col-md-6 col-lg-7 col-xl-8 overflow-auto"  style='height: 65vh;' id="chat-box">
