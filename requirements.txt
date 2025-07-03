@@ -6,3 +6,4 @@ werkzeug
 livereload
 openai
 gpt4all
+gunicorn
