@@ -1,0 +1,194 @@
+/* Basic Reset and Font */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+    background-color: #f4f7f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Container and Header */
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+header {
+    text-align: center;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+}
+
+h1 {
+    color: #0056b3; /* A professional blue color */
+    margin-bottom: 10px;
+}
+
+.intro {
+    font-size: 1.1em;
+    color: #555;
+}
+
+/* Form Styling */
+#medical-form {
+    display: flex;
+    flex-direction: column;
+}
+
+fieldset {
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    background-color: #fafafa;
+}
+
+legend {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #0056b3;
+    padding: 0 10px;
+    margin-right: 20px; /* For RTL */
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #444;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+}
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 86, 179, 0.2);
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Radio and Checkbox Groups */
+.radio-group, .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-right: 10px;
+}
+
+.radio-group label, .checkbox-group label {
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+input[type="radio"], input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    transform: scale(1.2);
+}
+
+/* Range Slider */
+.range-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+input[type="range"] {
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.range-container output {
+    font-weight: 700;
+    background-color: #0056b3;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Disclaimer and Submit Button */
+.disclaimer {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 15px 20px;
+    font-size: 1.2em;
+    font-weight: 700;
+    font-family: 'Cairo', sans-serif;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #777;
+    font-size: 0.9em;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    legend {
+        font-size: 1.1em;
+    }
+}
