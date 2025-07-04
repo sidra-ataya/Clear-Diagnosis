@@ -6,4 +6,9 @@ werkzeug
 livereload
 openai
 gpt4all
-gunicorn
+python-dotenv  
+flask_mail
+python-dotenv
+dotenv
+requests
+

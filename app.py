@@ -6,9 +6,11 @@ from livereload import Server
 from config import Config
 from models import *  # Import All models here
 import os
-from flask_mail import Mail, Message #add email and environment variables libraries
 from dotenv import load_dotenv
 from flask_login import login_required, current_user # Make sure these are imported
+from dotenv import load_dotenv
+import smtplib 
+from email.message import EmailMessage 
 
 load_dotenv()
 
@@ -17,15 +19,14 @@ app.config.from_object(Config)
 
 ### ---Flask-Mail --- ###
 # Get email configuration from environment variables
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
-app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
-app.config['ADMIN_EMAIL'] = os.environ.get('ADMIN_EMAIL')
-
+app.config['MAIL_SERVER'] = 'localhost'
+app.config['MAIL_PORT'] = 1025 
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = None
+app.config['MAIL_PASSWORD'] = None
+# ...
 # Flask-Mail
-mail = Mail(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
@@ -169,6 +170,11 @@ def submit_consultation():
             --- End of Report ---
             """
 
+            msg = EmailMessage()
+            msg.set_content(email_body)
+            msg['Subject'] = subject
+            msg['From'] = 'Clear Diagnosis System <no-reply@yourdomain.com>' # يمكنك وضع أي بريد هنا
+            msg['To'] = app.config['ADMIN_EMAIL'] # يفترض أن لديك هذا المتغير في config.py
             # --- 3. Send Email ---
             msg = Message(
                 subject,
@@ -176,8 +182,12 @@ def submit_consultation():
                 recipients=[app.config['ADMIN_EMAIL']] # Send to admin email
             )
             msg.body = email_body
-            
-            mail.send(msg)
+
+            # send using smtplib
+            # settings get from (localhost:1025)
+            with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as s:
+                s.send_message(msg)
+
             flash('Form submitted and saved successfully!', 'success')
             return redirect(url_for('thank_you'))
 
