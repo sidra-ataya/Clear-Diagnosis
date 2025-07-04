@@ -100,7 +100,7 @@ def logout():
 @login_required  
 def consultation_form():
     """Renders the medical consultation form page."""
-    return render_template('questions.html')
+    return render_template('question.html')
 
 # 2. Handle form submission and send the data via email
 @app.route('/submit-consultation', methods=['POST'])
