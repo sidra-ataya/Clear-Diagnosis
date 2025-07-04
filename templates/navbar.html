@@ -7,20 +7,17 @@
             <!-- ***** Logo Start ***** -->
             <a href="{{ url_for('home') }}" class="logo">
               <h4>Clear<span>Diagnosis</span></h4>
+              <img src="{{ url_for('static', filename='images/Logo PNG-01.png') }}" alt="Clear Diagnosis Logo" style="width: 50px; height: 50px;">
             </a>
-            <!-- ***** Logo End ***** -->
             <!-- ***** Menu Start ***** -->
             <ul class="nav">
               <li class="scroll-to-section"><a href="{{ url_for('home') }}" class="active">Home</a></li>
               <li class="scroll-to-section"><a href="#about">About Us</a></li>
               <li class="scroll-to-section"><a href="#services">Services</a></li>
-              <li class="scroll-to-section"><a href="#FAQ">FAQ</a></li>
+              <li class="scroll-to-section"><a href="{{ url_for('questions') }}">FAQ</a></li>
               <li class="scroll-to-section"><a href="#blog">Blog</a></li> 
               <li class="scroll-to-section"><a href="#contact">Message Us</a></li> 
-              {% if current_user.is_authenticated %}
               <li class="scroll-to-section"><a href="{{url_for('chat', conversation_id=0)}}">Dashboard</a></li> 
-                {% endif %}
-
               <li class="scroll-to-section">
                 <div class="main-red-button">
                   {% if current_user.is_authenticated %}

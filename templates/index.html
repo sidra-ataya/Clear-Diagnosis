@@ -2,30 +2,22 @@
 <html lang="en">
 
   <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
     <title>Clear Diagnosis</title>
-
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
-
-
     <!-- Additional CSS Files -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/templatemo-space-dynamic.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animated.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.css') }}">
-
   </head>
-
 <body>
-
   <!-- ***** Preloader Start ***** -->
   <div id="js-preloader" class="js-preloader">
     <div class="preloader-inner">
@@ -50,15 +42,7 @@
                 <h2>Your  <em>Smart Medical Assistant</em> </h2>
                 <p>Get quick medical diagnosis and advice with the power of AI. Start your diagnosis now</p>
                 <li class="scroll-to-section"><div class="main-red-button"><a href="loginandsinup.html">Start Your Diagnosis
-
-
-
-
-
-
                 </a></div></li>
-                   
-                </form>
               </div>
             </div>
             <div class="col-lg-6">
@@ -373,6 +357,21 @@
   <script src="{{ url_for('static', filename='js/imagesloaded.js') }}"></script>
   <script src="{{ url_for('static', filename='js/templatemo-custom.js') }}"></script>
 
-
+<script>
+  // منع جميع الروابط التي href="#" من عمل scroll للأعلى
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('a[href="#"]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+      });
+    });
+    // أيضاً لمنع الروابط التي href="#!"
+    document.querySelectorAll('a[href="#!"]').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+      });
+    });
+  });
+</script>
 </body>
 </html>

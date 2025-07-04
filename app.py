@@ -2,24 +2,36 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, f
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_migrate import Migrate
 from openai import OpenAI
-#from gpt4all import GPT4All
 from livereload import Server
 from config import Config
 from models import *  # Import All models here
 import os
+from flask_mail import Mail, Message #add email and environment variables libraries
+from dotenv import load_dotenv
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-db.init_app(app)
+### ---Flask-Mail --- ###
+# Get email configuration from environment variables
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
+app.config['ADMIN_EMAIL'] = os.environ.get('ADMIN_EMAIL')
 
+# Flask-Mail
+mail = Mail(app)
+
+db.init_app(app)
 migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
   api_key="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",
 )
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -37,7 +49,6 @@ def load_user(user_id):
 def create_tables():
     """Create database tables before the first request."""
     db.create_all()
-
 
 @app.route("/")
 def home():
@@ -79,6 +90,85 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
+### --- Medical Consultation Form Routes --- ###
+
+# 1. Display the medical consultation form (questions.html)
+@app.route('/consultation')
+def consultation_form():
+    """Renders the medical consultation form page."""
+    return render_template('questions.html')
+
+# 2. Get the form data and send it via email
+@app.route('/submit-consultation', methods=['POST'])
+def submit_consultation():
+    """Handles form submission and sends the data via email."""
+    if request.method == 'POST':
+        # To ensure the form data is processed correctly
+        form_data = request.form
+
+        # Create the email subject and body
+        # Using get() to avoid KeyError if a field is missing
+        subject = f"Consultation Request from: {form_data.get('full_name', 'N/A')}"
+
+        email_body = f"""
+        Consultation Request Submission, 
+        --- 1. Personal Information and Main Complaint ---
+        - Full Name: {form_data.get('full_name')}
+        - Age: {form_data.get('age')}
+        - Gender: {form_data.get('gender')}
+        - Main Complaint: {form_data.get('main_complaint')}
+
+        --- 2. Current Symptoms Details ---
+        - Onset: {form_data.get('onset')}
+        - Location: {form_data.get('location')}
+        - Character: {form_data.get('character')}
+        - Duration: {form_data.get('duration')}
+        - Aggravating Factors: {form_data.get('aggravating')}
+        - Alleviating Factors: {form_data.get('alleviating')}
+        - Related Symptoms: {form_data.get('related_symptoms')}
+        - Severity (1-10): {form_data.get('severity')}
+
+        --- 3. Medical History ---
+        - Chronic Diseases: {", ".join(form_data.getlist('chronic_diseases'))}
+        - Current Medications: {form_data.get('medications')}
+        - Allergies: {form_data.get('allergies')}
+        - Previous Surgeries: {form_data.get('surgeries')}
+
+        --- 4. Lifestyle ---
+        - Smoking Status: {form_data.get('smoking')}
+
+        --- End of Report ---
+        """
+
+        # Create the email message
+        # Using Flask-Mail to send the email
+        msg = Message(
+            subject,
+            sender=('Clear Diagnosis System', app.config['MAIL_USERNAME']),
+            recipients=[app.config['ADMIN_EMAIL']] # Send to admin email
+        )
+        msg.body = email_body
+        
+        try:
+            mail.send(msg)
+            flash('Form submitted successfully!', 'success')
+            return redirect(url_for('thank_you'))
+        except Exception as e:
+            flash(f'Error occurred while sending the form: {e}', 'danger')
+            return redirect(url_for('consultation_form'))
+
+    return redirect(url_for('consultation_form'))
+
+# 3. Route for the thank you page after successful submission
+@app.route('/thank-you')
+def thank_you():
+    """Displays a thank you page after successful form submission."""
+    return render_template('thank_you.html') # It's better to create a simple thank you page
+
+### ----------------------------------------------------------------- ###
+
+# --- Chat Routes ---
 @app.route("/dashboard")
 def dashboard():
     conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
