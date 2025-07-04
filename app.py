@@ -84,7 +84,7 @@ def signup():
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            return redirect(url_for('chat', Conversation_id=0), user=current_user)
+            return redirect(url_for('chat', conversation_id=0), user=current_user)
     return render_template('signup.html')
 
 @app.route("/logout")
