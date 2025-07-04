@@ -8,7 +8,9 @@ from models import *  # Import All models here
 import os
 from flask_mail import Mail, Message #add email and environment variables libraries
 from dotenv import load_dotenv
+from flask_login import login_required, current_user # Make sure these are imported
 
+load_dotenv()
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -90,72 +92,98 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-
 ### --- Medical Consultation Form Routes --- ###
 
 # 1. Display the medical consultation form (questions.html)
 @app.route('/consultation')
+@login_required  
 def consultation_form():
     """Renders the medical consultation form page."""
     return render_template('questions.html')
 
-# 2. Get the form data and send it via email
+# 2. Handle form submission and send the data via email
 @app.route('/submit-consultation', methods=['POST'])
+@login_required 
+
 def submit_consultation():
-    """Handles form submission and sends the data via email."""
+    """Handles form submission, saves it to the database, and then sends the data via email."""
     if request.method == 'POST':
-        # To ensure the form data is processed correctly
         form_data = request.form
 
-        # Create the email subject and body
-        # Using get() to avoid KeyError if a field is missing
-        subject = f"Consultation Request from: {form_data.get('full_name', 'N/A')}"
-
-        email_body = f"""
-        Consultation Request Submission, 
-        --- 1. Personal Information and Main Complaint ---
-        - Full Name: {form_data.get('full_name')}
-        - Age: {form_data.get('age')}
-        - Gender: {form_data.get('gender')}
-        - Main Complaint: {form_data.get('main_complaint')}
-
-        --- 2. Current Symptoms Details ---
-        - Onset: {form_data.get('onset')}
-        - Location: {form_data.get('location')}
-        - Character: {form_data.get('character')}
-        - Duration: {form_data.get('duration')}
-        - Aggravating Factors: {form_data.get('aggravating')}
-        - Alleviating Factors: {form_data.get('alleviating')}
-        - Related Symptoms: {form_data.get('related_symptoms')}
-        - Severity (1-10): {form_data.get('severity')}
-
-        --- 3. Medical History ---
-        - Chronic Diseases: {", ".join(form_data.getlist('chronic_diseases'))}
-        - Current Medications: {form_data.get('medications')}
-        - Allergies: {form_data.get('allergies')}
-        - Previous Surgeries: {form_data.get('surgeries')}
-
-        --- 4. Lifestyle ---
-        - Smoking Status: {form_data.get('smoking')}
-
-        --- End of Report ---
-        """
-
-        # Create the email message
-        # Using Flask-Mail to send the email
-        msg = Message(
-            subject,
-            sender=('Clear Diagnosis System', app.config['MAIL_USERNAME']),
-            recipients=[app.config['ADMIN_EMAIL']] # Send to admin email
+        # create a new Consultation object with the form data
+        new_consultation = Consultation(
+            user_id=current_user.id,
+            full_name=form_data.get('full_name'),
+            age=form_data.get('age'),
+            gender=form_data.get('gender'),
+            main_complaint=form_data.get('main_complaint'),
+            onset=form_data.get('onset'),
+            location=form_data.get('location'),
+            character=form_data.get('character'),
+            duration=form_data.get('duration'),
+            aggravating_factors=form_data.get('aggravating'),
+            alleviating_factors=form_data.get('alleviating'),
+            related_symptoms=form_data.get('related_symptoms'),
+            severity=form_data.get('severity'),
+            chronic_diseases=", ".join(form_data.getlist('chronic_diseases')), # Handle list
+            current_medications=form_data.get('medications'),
+            allergies=form_data.get('allergies'),
+            previous_surgeries=form_data.get('surgeries'),
+            smoking_status=form_data.get('smoking')
         )
-        msg.body = email_body
         
         try:
+            db.session.add(new_consultation)
+            db.session.commit()
+
+            # Crate the email subject using the new_consultation object
+            subject = f"Consultation Request #{new_consultation.id} from: {new_consultation.full_name}"
+            
+            email_body = f"""
+            New Consultation Request Submitted (ID: {new_consultation.id}), 
+            --- 1. Personal Information and Main Complaint ---
+            - Full Name: {new_consultation.full_name}
+            - Age: {new_consultation.age}
+            - Gender: {new_consultation.gender}
+            - Main Complaint: {new_consultation.main_complaint}
+
+            --- 2. Current Symptoms Details ---
+            - Onset: {new_consultation.onset}
+            - Location: {new_consultation.location}
+            - Character: {new_consultation.character}
+            - Duration: {new_consultation.duration}
+            - Aggravating Factors: {new_consultation.aggravating_factors}
+            - Alleviating Factors: {new_consultation.alleviating_factors}
+            - Related Symptoms: {new_consultation.related_symptoms}
+            - Severity (1-10): {new_consultation.severity}
+
+            --- 3. Medical History ---
+            - Chronic Diseases: {new_consultation.chronic_diseases}
+            - Current Medications: {new_consultation.current_medications}
+            - Allergies: {new_consultation.allergies}
+            - Previous Surgeries: {new_consultation.previous_surgeries}
+
+            --- 4. Lifestyle ---
+            - Smoking Status: {new_consultation.smoking_status}
+
+            --- End of Report ---
+            """
+
+            # --- 3. Send Email ---
+            msg = Message(
+                subject,
+                sender=('Clear Diagnosis System', app.config['MAIL_USERNAME']),
+                recipients=[app.config['ADMIN_EMAIL']] # Send to admin email
+            )
+            msg.body = email_body
+            
             mail.send(msg)
-            flash('Form submitted successfully!', 'success')
+            flash('Form submitted and saved successfully!', 'success')
             return redirect(url_for('thank_you'))
+
         except Exception as e:
-            flash(f'Error occurred while sending the form: {e}', 'danger')
+            db.session.rollback() # Rollback the session in case of failure
+            flash(f'An error occurred: {e}', 'danger')
             return redirect(url_for('consultation_form'))
 
     return redirect(url_for('consultation_form'))
@@ -165,6 +193,27 @@ def submit_consultation():
 def thank_you():
     """Displays a thank you page after successful form submission."""
     return render_template('thank_you.html') # It's better to create a simple thank you page
+
+### ----------------------------------------------------------------- ###
+# --- Consultation Routes ---
+@app.route('/my_consultations')
+@login_required
+def my_consultations():
+    """Display a list of all consultations submitted by the current user."""
+    # Query consultations for the logged-in user, newest first
+    consultations = Consultation.query.filter_by(user_id=current_user.id).order_by(Consultation.timestamp.desc()).all()
+    return render_template('my_consultations.html', consultations=consultations)
+
+@app.route('/consultation_details/<int:consultation_id>')
+@login_required
+def consultation_details(consultation_id):
+    """Display the full details of a specific consultation."""
+    consultation = Consultation.query.get_or_404(consultation_id)
+    # Security check: ensure the user owns this consultation
+    if consultation.user_id != current_user.id:
+        from flask import abort
+        abort(403) # Forbidden
+    return render_template('consultation_details.html', consultation=consultation)
 
 ### ----------------------------------------------------------------- ###
 
