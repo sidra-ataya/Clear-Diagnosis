@@ -8,6 +8,7 @@
     
     <!-- Link to the form's CSS file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/questions.css') }}">    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav.css') }}">    
     <!-- Using a font that supports English well, like 'Poppins' or 'Roboto' -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,10 +20,12 @@
             <nav class="main-nav">
                 <img src="Logo PNG-01.png" class="logo" style="width: 200px; height: 200px;"> <!-- Assuming you have an index route -->
                 <ul class="nav">
-                    <li><a href="{{ url_for('index') }}">Home</a></li>
-                    <li><a href="{{ url_for('show_consultation_form') }}" class="active">Consultation</a></li>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
+                    <li class="scroll-to-section"><a href="{{ url_for('home') }}" class="active">Home</a></li>
+                    <li class="scroll-to-section"><a href="#about">About Us</a></li>
+                    <li class="scroll-to-section"><a href="#services">Services</a></li>
+                    <li class="scroll-to-section"><a href="#blog">Blog</a></li> 
+                    <li class="scroll-to-section"><a href="#contact">Message Us</a></li> 
+                    <li class="scroll-to-section"><a href="{{url_for('chat', conversation_id=0)}}">Dashboard</a></li>
                 </ul>
                 <a class='menu-trigger'>
                     <span>Menu</span>
